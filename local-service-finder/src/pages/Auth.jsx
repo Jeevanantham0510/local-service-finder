@@ -1,55 +1,90 @@
 import { useState } from "react";
+import API from "../service/api";
+import { useNavigate } from "react-router-dom";
 
 function Auth() {
   const [isLogin, setIsLogin] = useState(true);
+  const [form, setForm] = useState({});
+  const navigate = useNavigate();
+
+  const handleSubmit = async () => {
+    try {
+      if (isLogin) {
+        const res = await API.post("/auth/login", form);
+
+        alert(res.data.message);
+
+        // Save login info
+        localStorage.setItem("role", res.data.role);
+        localStorage.setItem("email", form.email);
+        localStorage.setItem("isLoggedIn", "true");
+
+        navigate("/providers");
+      } else {
+        await API.post("/auth/register", form);
+        alert("Registered Successfully");
+        setIsLogin(true);
+      }
+    } catch (err) {
+      alert("Error occurred");
+    }
+  };
 
   return (
+
+     <div style={styles.wrapper}>
     <div style={styles.container}>
       <h2>{isLogin ? "Login" : "Register"}</h2>
 
-      <input type="text" placeholder="Email" style={styles.input} />
-      <input type="password" placeholder="Password" style={styles.input} />
-
       {!isLogin && (
-        <input type="text" placeholder="Phone Number" style={styles.input} />
+        <input
+          placeholder="Name"
+          onChange={(e) => setForm({ ...form, name: e.target.value })}
+        />
       )}
 
-      <button style={styles.button}>
+      <input
+        placeholder="Email"
+        onChange={(e) => setForm({ ...form, email: e.target.value })}
+      />
+
+      <input
+        type="password"
+        placeholder="Password"
+        onChange={(e) => setForm({ ...form, password: e.target.value })}
+      />
+
+      <button onClick={handleSubmit}>
         {isLogin ? "Login" : "Register"}
       </button>
 
-      <p onClick={() => setIsLogin(!isLogin)} style={styles.toggle}>
-        {isLogin
-          ? "Don't have an account? Register"
-          : "Already have an account? Login"}
+      <p onClick={() => setIsLogin(!isLogin)} style={{ cursor: "pointer" }}>
+        {isLogin ? "New user? Register" : "Already Login?"}
       </p>
     </div>
+    </div>
+    
   );
 }
 
 const styles = {
+  wrapper: {
+    minHeight: "calc(100vh - 70px)",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center"
+  },
   container: {
-    width: "300px",
-    margin: "50px auto",
-    textAlign: "center"
+    
+    display: "flex",
+    flexDirection: "column",
+    width: "320px",
+    padding: "30px",
+    gap: "12px",
+    backgroundColor: "white",
+    borderRadius: "8px",
+    boxShadow: "0 4px 10px rgba(0,0,0,0.1)",
   },
-  input: {
-    width: "100%",
-    padding: "10px",
-    margin: "10px 0"
-  },
-  button: {
-    width: "100%",
-    padding: "10px",
-    backgroundColor: "blue",
-    color: "white",
-    border: "none"
-  },
-  toggle: {
-    marginTop: "10px",
-    color: "blue",
-    cursor: "pointer"
-  }
 };
 
 export default Auth;

@@ -1,30 +1,55 @@
+import { useEffect, useState } from "react";
+import API from "../service/api";
+import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
+import styles from "../styles/globalStyles";
+
 function Providers() {
-  const providers = [
-    { id: 1, sname: "Electrician", location: "Erode",contact:"9876543210" },
-    { id: 2, sname: "Plumber", location: "Chennai" ,contact:"8976543210"},
-    { id: 3, sname: "Carpenter", location: "Chennai",contact:"7896543210" }
-  ];
+
+  const [providers,setProviders] = useState([]);
+  const navigate = useNavigate();
+
+  useEffect(()=>{
+    API.get("/providers")
+    .then(res => setProviders(res.data))
+  },[])
 
   return (
-    <div style={{ padding: "20px" }}>
-      <h2>Available Service Providers</h2>
-      {providers.map((p) => (
-        <div key={p.id} style={styles.card}>
-          <h3>{p.sname}</h3>
-          <p>{p.location}</p>
-          <p>{p.contact}</p>
-        </div>
-      ))}
+
+    <div style={styles.page}>
+
+      <h2 style={{textAlign:"center"}}>Available Providers</h2>
+
+      <div style={styles.grid}>
+
+        {providers.map((p)=>(
+
+          <motion.div
+            key={p.id}
+            style={styles.card}
+            whileHover={{scale:1.05}}
+          >
+
+            <h3>{p.name}</h3>
+            <p><b>Service:</b> {p.serviceType}</p>
+            <p><b>Location:</b> {p.location}</p>
+            <p>⭐ {p.rating}</p>
+
+            <button
+              style={styles.button}
+              onClick={()=>navigate(`/booking/${p.id}`)}
+            >
+              Book Now
+            </button>
+
+          </motion.div>
+
+        ))}
+
+      </div>
+
     </div>
   );
 }
-
-const styles = {
-  card: {
-    border: "1px solid gray",
-    padding: "10px",
-    margin: "20px "
-  }
-};
 
 export default Providers;
